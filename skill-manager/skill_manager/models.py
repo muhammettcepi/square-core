@@ -17,6 +17,7 @@ class SkillType(str, Enum):
     multiple_choice = "multiple-choice"
     categorical = "categorical"
     information_retrieval = "information-retrieval"
+    multi_skill = "meta-skill"
 
 
 class DataSet(str, Enum):
