@@ -79,6 +79,7 @@ async def get_skills_by_dataset(request: Request, dataset: str = None):
             skills=", ".join(["{}:{}".format(s.name, str(s.id)) for s in skills])
         )
     )
+    return skills
 
 
 @router.get(
