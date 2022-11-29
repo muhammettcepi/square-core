@@ -1,9 +1,13 @@
 import logging
 import uuid
+import requests
+import os
 
 from square_skill_api.models import QueryOutput, QueryRequest
 
 from square_model_client import SQuAREModelClient
+
+from square_auth.client_credentials import ClientCredentials
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +23,6 @@ async def predict(request: QueryRequest) -> QueryOutput:
     # Call Model API
     model_request = {
         "input": [query],
-        "explain_kwargs": {},
-        "attack_kwargs": {},
     }
 
     logger.debug("Request for model api:{}".format(model_request))
@@ -37,10 +39,14 @@ async def predict(request: QueryRequest) -> QueryOutput:
     logger.info("TWEAC prediction: {}".format(dataset_name))
     
     # API call to Skill Manager to get the names of the skills trained on the dataset
-    skill_names = []
-
-    return QueryOutput.from_sequence_classification(
-        questions=query,
-        answers=skill_names,
-        model_api_output=model_response,
-    )
+    skill_manager_api_url = os.getenv("VUE_APP_SKILL_MANAGER_URL")
+    client_credentials = ClientCredentials()
+    response = requests.get(
+            url=f"{skill_manager_api_url}/dataset/{dataset_name}",
+            headers={"Authorization": f"Bearer {client_credentials}"},
+            verify=os.getenv("VERIFY_SSL") == "1",
+        )
+    list_skills = response.json()
+    list_skill_ids = [skill["id"] for skill in list_skills]
+    
+    return list_skill_ids
