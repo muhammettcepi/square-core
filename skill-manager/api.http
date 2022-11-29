@@ -1,3 +1,5 @@
+################################################################################################# api call examples
+
 @hostname = localhost:8000
 @path_prefix = /api
 @token = <ENTER TOKEN>
