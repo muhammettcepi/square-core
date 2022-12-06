@@ -12,7 +12,7 @@ services:
     #    env_file:
     #      - ./management_server/.env
     env_file:
-      - .env
+      - .local.env
     #    volumes:
     #      - ./management_server/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
     #      - ./management_server/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
@@ -25,7 +25,7 @@ services:
     #    env_file:
     #      - .env
     env_file:
-      - .env
+      - .local.env
     command: [ "redis-server", "--requirepass ${REDIS_PASSWORD}" ]
 
   mongo:
@@ -37,7 +37,7 @@ services:
     ports:
       - 27017:27017
     env_file:
-      - .env
+    - .local.env
 
   maintaining_worker:
 #    image: ukpsquare/square-model-management-v2:latest
@@ -50,18 +50,20 @@ services:
     volumes:
       - ./:/usr/src/app
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./private_key.pem:/app/private_key.pem
 #    env_file:
 #      - ./management_server/.env
     env_file:
-      - .env
+      - .local.env
     environment:
       - DOCKER_HOST_URL=https://172.17.0.1:8443
       - MODEL_API_IMAGE=ukpsquare/model-inference
       - MONGO_INITDB_ROOT_USERNAME=root
       - VERIFY_SSL=0
-      - KEYCLOAK_BASE_URL=https://square.ukp-lab.de
+      - KEYCLOAK_BASE_URL=""
       - REALM=square
       - CLIENT_ID=models
+      - SQUARE_PRIVATE_KEY_FILE=/app/private_key.pem
     links:
       - rabbit
       - redis
@@ -82,6 +84,7 @@ services:
       - 9001:9001
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./private_key.pem:/app/private_key.pem
     links:
       - mongo
     depends_on:
@@ -89,15 +92,16 @@ services:
 #    env_file:
 #      - ./management_server/.env
     env_file:
-      -  .env
+      - .local.env
     environment:
       - DOCKER_HOST_URL=https://172.17.0.1:8443
       - MODEL_API_IMAGE=ukpsquare/model-inference
       - VERIFY_SSL=0
       - WEB_CONCURRENCY=1
       - ONNX_VOLUME=model-inference_onnx-models
-      - KEYCLOAK_BASE_URL=https://square.ukp-lab.de
+      - KEYCLOAK_BASE_URL=""
       - REALM=square
+      - SQUARE_PRIVATE_KEY_FILE=/app/private_key.pem
       - CLIENT_ID=models
       - CONFIG_PATH=/model_configs
     labels:
